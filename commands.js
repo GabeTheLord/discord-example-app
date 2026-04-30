@@ -44,6 +44,22 @@ const CHALLENGE_COMMAND = {
   contexts: [0, 2],
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
+const DEBUG_COMMAND = {
+  name: 'debug',
+  description: 'Debug command, used for getting bot stats and states.',
+  options: [
+    {
+      type: 3,
+      description: 'Debug options',
+      required: true,
+      choices: [],
+    },
+  ],
+  type: 1,
+  integration_types: [0, 1],
+  contexts: [0, 1, 2],
+};
+
+const ALL_COMMANDS = [DEBUG_COMMAND, TEST_COMMAND, CHALLENGE_COMMAND];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);

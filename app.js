@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import fs from 'fs';
 import express from 'express';
 import {
   ButtonStyleTypes,
+  ChannelTypes,
   InteractionResponseFlags,
   InteractionResponseType,
   InteractionType,
@@ -18,6 +20,54 @@ const PORT = process.env.PORT || 3000;
 // To keep track of our active games
 const activeGames = {};
 
+const appApi = express();
+
+const API_PORT = 4444;
+
+//const fs = require('fs');
+
+
+// const {Client, IntenseBitField} = require('discord.js');
+
+// const client = new Client({
+//   intents: [IntenseBitField.Flags.GUILDS,
+//             IntenseBitField.Flags.GUILD_MESSAGES,
+//             IntenseBitField.Flags.GUILD_MEMBERS
+//           ],
+// });
+
+// client.on('ready', () => {
+//   console.log(`Logged in as ${client.user.tag}!`);
+// });
+
+
+appApi.get('/:name', (req, res) => {
+  const test = req.params['name'];
+  
+  fs.readFile('rescorces/html/index.html', (err, data) => {
+  if (err) throw err;
+  
+  res.send(data.toString());
+
+  //console.log(req.body);
+  });
+  
+  //res.send('API is running!');
+  DiscordRequest('channels/1477687897816567871/messages', {method: 'POST', body: {
+    "content": test,
+    "tts": false,
+    "embeds": [{
+      "title": "Hello, Embed!",
+      "description": getRandomEmoji(),
+      "color": 5814783,
+    }]
+  }});
+});
+
+appApi.listen(API_PORT, () => {
+  console.log(`API is running on port ${API_PORT}`);
+});
+
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
  * Parse request body and verifies incoming requests using discord-interactions package
@@ -26,12 +76,20 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
   // Interaction id, type and data
   const { id, type, data } = req.body;
 
+  // if (req.type === 'text/html') {
+  //   return res.send({
+  //     type: 
+  //   });
+
+  // }
+
   /**
    * Handle verification requests
    */
   if (type === InteractionType.PING) {
     return res.send({ type: InteractionResponseType.PONG });
   }
+
 
   /**
    * Handle slash command requests
@@ -52,6 +110,23 @@ app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async fun
               type: MessageComponentTypes.TEXT_DISPLAY,
               // Fetches a random emoji to send from a helper function
               content: `hello world ${getRandomEmoji()}`
+            }
+          ]
+        },
+      });
+    }
+
+    if (name === 'debug') {
+      // Send a message into the channel where command was triggered from
+      return res.send({
+        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+        data: {
+          flags: InteractionResponseFlags.IS_COMPONENTS_V2,
+          components: [
+            {
+              type: MessageComponentTypes.TEXT_DISPLAY,
+              // Fetches a random emoji to send from a helper function
+              content: `Debug ${getRandomEmoji()}`
             }
           ]
         },
